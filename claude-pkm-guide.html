@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code: A Practical Field Guide</title>
+  <style>
+    /* ── Design system ── */
+    :root {
+      --primary:       #6FC7B0;   /* seafoam — main brand color */
+      --primary-dark:  #4BA892;
+      --primary-light: #EEF9F6;
+      --sand:          #E8A17A;   /* warm sand */
+      --sand-dark:     #C47A52;
+      --sand-light:    #FDF0E6;
+      --sun:           #F0C96A;   /* sun gold */
+      --sun-light:     #FEF8E6;
+      --ocean:         #5B9EB8;   /* ocean blue */
+      --ocean-light:   #E8F4F9;
+      --purple:        #7C3AED;   /* kept for knowledge cycle stage 5 */
+      --purple-light:  #F5F3FF;
+
+      /* Semantic aliases */
+      --coral:         var(--primary);
+      --coral-dark:    var(--primary-dark);
+      --coral-light:   var(--primary-light);
+      --teal:          var(--primary);
+      --teal-dark:     var(--primary-dark);
+      --teal-light:    var(--primary-light);
+      --amber:         var(--sun);
+      --amber-light:   var(--sun-light);
+      --info:          var(--ocean);
+      --info-light:    var(--ocean-light);
+      --success:       var(--primary-dark);
+      --success-light: var(--primary-light);
+      --warn:          var(--sand-dark);
+      --warn-light:    var(--sand-light);
+
+      --bg:            #F4FAF8;
+      --white:         #FFFFFF;
+      --text:          #1E3830;
+      --text-body:     #3C5249;
+      --text-muted:    #7A9281;
+      --border:        #C8E8E0;
+      --border-md:     #A8D4C8;
+
+      --shadow:        0 2px 4px rgba(0,0,0,0.12);
+      --shadow-md:     0 4px 12px rgba(0,0,0,0.15);
+      --shadow-lg:     0 8px 28px rgba(0,0,0,0.18);
+
+      --radius-sm:     4px;
+      --radius:        8px;
+      --radius-lg:     12px;
+      --radius-xl:     16px;
+
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text-body); line-height: 1.6; font-size: 15px; }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(140deg, #6FC7B0 0%, #3A9E87 55%, #1E6E5A 100%);
+      color: white;
+      padding: 64px 24px 56px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; right: -60px;
+      width: 320px; height: 320px;
+      background: radial-gradient(circle, rgba(240,201,106,0.35) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.30);
+      color: rgba(255,255,255,0.95);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 18px;
+    }
+    .hero h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.6px; margin-bottom: 12px; line-height: 1.2; }
+    .hero h1 span { color: rgba(255,255,255,0.75); }
+    .hero .sub { font-size: 1.05rem; opacity: 0.88; max-width: 580px; margin: 0 auto 28px; line-height: 1.7; }
+    .hero-meta { font-size: 0.8rem; opacity: 0.55; }
+    .hero-cta-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 20px; border-radius: var(--radius);
+      font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+      text-decoration: none; border: none;
+    }
+    .btn-white { background: white; color: var(--coral-dark); }
+    .btn-white:hover { background: #FFF0F0; }
+    .btn-outline { background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.35); }
+    .btn-outline:hover { background: rgba(255,255,255,0.20); }
+
+    /* ── Sticky nav ── */
+    .top-nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.97);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; gap: 0;
+      padding: 0 24px;
+      overflow-x: auto;
+    }
+    .top-nav a {
+      display: flex; align-items: center; gap: 5px;
+      padding: 12px 14px;
+      font-size: 0.82rem; font-weight: 600; color: var(--text-muted);
+      text-decoration: none; white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .top-nav a:hover { color: var(--coral); border-bottom-color: var(--coral-light); }
+    .top-nav a.active { color: var(--coral); border-bottom-color: var(--coral); }
+
+    /* ── Layout ── */
+    .page-wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+    .section { margin-bottom: 56px; }
+    .section-title {
+      font-size: 1.55rem; font-weight: 800; color: var(--text);
+      margin-bottom: 6px; letter-spacing: -0.4px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-subtitle { color: var(--text-muted); font-size: 0.92rem; margin-bottom: 24px; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 20px 22px;
+      box-shadow: var(--shadow);
+    }
+    .card + .card { margin-top: 12px; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; align-items: stretch; }
+    .card-grid .card { display: flex; flex-direction: column; }
+    .card h3 { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .card p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.55; flex: 1; }
+
+    /* ── Tag pills ── */
+    .tag {
+      display: inline-block; font-size: 0.72rem; font-weight: 600;
+      padding: 2px 8px; border-radius: 12px; letter-spacing: 0.03em;
+    }
+    .tag-purple { background: var(--coral-light); color: var(--coral); }
+    .tag-teal   { background: var(--teal-light);   color: var(--teal); }
+    .tag-amber  { background: var(--amber-light);   color: var(--amber); }
+    .tag-info   { background: var(--info-light);    color: var(--info); }
+    .tag-success{ background: var(--success-light); color: var(--success); }
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-radius: var(--radius); padding: 14px 16px;
+      font-size: 0.88rem; line-height: 1.6; margin: 16px 0;
+      display: flex; gap: 10px;
+    }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    .callout-info    { background: var(--info-light);    border-left: 3px solid var(--info); }
+    .callout-warn    { background: var(--warn-light);    border-left: 3px solid var(--warn); }
+    .callout-success { background: var(--success-light); border-left: 3px solid var(--success); }
+    .callout-tip     { background: var(--teal-light);   border-left: 3px solid var(--teal); }
+    .callout strong { color: var(--text); }
+
+    /* ── Code blocks ── */
+    pre, code {
+      font-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace;
+      font-size: 0.83rem;
+    }
+    pre {
+      background: #1E1B4B; color: #E2E8F0;
+      border-radius: var(--radius); padding: 16px 18px;
+      overflow-x: auto; line-height: 1.6; margin: 12px 0;
+    }
+    code:not(pre code) {
+      background: var(--teal-light); color: var(--teal-dark);
+      padding: 2px 6px; border-radius: 4px;
+    }
+
+    /* ── Steps / stepper ── */
+    .stepper { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: flex; gap: 16px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--coral); color: white;
+      font-size: 0.88rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .step-content h3 { font-size: 1.02rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .step-content p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; }
+    .step-content .step-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── Accordion ── */
+    .accordion { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .accordion-item + .accordion-item { border-top: 1px solid var(--border); }
+    .accordion-header {
+      padding: 14px 18px;
+      cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--white); transition: background 0.12s;
+      user-select: none;
+    }
+    .accordion-header:hover { background: var(--coral-light); }
+    .accordion-header h3 { font-size: 0.92rem; font-weight: 700; color: var(--text); }
+    .accordion-arrow { font-size: 0.85rem; color: var(--text-muted); transition: transform 0.2s; }
+    .accordion-item.open .accordion-arrow { transform: rotate(180deg); }
+    .accordion-body {
+      display: none;
+      padding: 16px 18px;
+      background: var(--bg);
+      font-size: 0.88rem; color: var(--text-body); line-height: 1.65;
+    }
+    .accordion-item.open .accordion-body { display: block; }
+
+    /* ── Table ── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    .data-table th {
+      background: var(--teal); color: white;
+      padding: 9px 13px; text-align: left; font-weight: 600;
+    }
+    .data-table td { padding: 9px 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:nth-child(even) td { background: #FAFAFA; }
+    .table-wrap { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); margin: 16px 0; }
+
+    /* ── Use case grid ── */
+    .use-case-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 18px 20px;
+      box-shadow: var(--shadow);
+    }
+    .use-case-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); transition: all 0.15s; }
+    .use-case-card h4 { font-size: 0.93rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .use-case-card .impact { font-size: 0.8rem; font-weight: 700; color: var(--success); margin-top: 8px; }
+    .use-case-card p { font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; }
+    .use-case-meta { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* ── Section divider ── */
+    .section-divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    /* ── Prompt example ── */
+    .prompt-box {
+      background: #FFF0F0; border: 1px solid #FFCDD2;
+      border-radius: var(--radius); padding: 14px 16px;
+      font-size: 0.87rem; font-style: italic; color: var(--text);
+      line-height: 1.6; margin: 10px 0;
+      position: relative;
+    }
+    .prompt-box::before {
+      content: '"';
+      font-size: 2rem; color: var(--teal); opacity: 0.3;
+      position: absolute; top: 6px; left: 10px;
+      font-family: Georgia, serif; line-height: 1;
+    }
+    .prompt-box p { padding-left: 16px; }
+
+    /* ── Skills table ── */
+    .skill-row { display: flex; gap: 12px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .skill-row:last-child { border-bottom: none; }
+    .skill-cmd { font-family: monospace; font-size: 0.83rem; background: #1E1B4B; color: #A5B4FC; padding: 3px 8px; border-radius: 4px; flex-shrink: 0; }
+    .skill-desc { font-size: 0.87rem; color: var(--text-body); }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center; padding: 40px 24px;
+      background: var(--white); border-top: 1px solid var(--border);
+      font-size: 0.82rem; color: var(--text-muted);
+    }
+    .footer a { color: var(--coral); text-decoration: none; }
+
+    /* ── Compare grid ── */
+    .compare-grid { display: grid; grid-template-columns: 1fr 52px 1fr; gap: 0; align-items: start; }
+    .compare-card { border-radius: var(--radius-lg); padding: 18px 16px; border: 2px solid var(--border); }
+    .compare-card.other { background: var(--bg); border-color: var(--border); }
+    .compare-card.cc { background: #F0FDF9; border-color: var(--primary); }
+    .compare-card h4 { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .compare-steps { display: flex; flex-direction: column; gap: 7px; }
+    .cstep { display: flex; align-items: flex-start; gap: 7px; background: var(--white); border-radius: 6px; padding: 8px 10px; border: 1px solid var(--border); font-size: 0.81rem; color: var(--text-body); line-height: 1.4; }
+    .cstep.dim { opacity: 0.38; }
+    .cstep.highlight { border-color: var(--primary); background: var(--primary-light); color: var(--text); }
+    .compare-vs { display: flex; align-items: flex-start; justify-content: center; padding-top: 52px; }
+    .vs-badge { width: 38px; height: 38px; border-radius: 50%; background: var(--sand); color: white; font-size: 0.78rem; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); flex-shrink: 0; }
+    .compound-callout { background: linear-gradient(135deg, var(--sand-light) 0%, #FFF9F0 100%); border: 1px solid rgba(232,161,122,0.30); border-radius: var(--radius-lg); padding: 18px 20px; display: flex; align-items: flex-start; gap: 14px; margin-top: 18px; }
+
+    /* ── File tree ── */
+    .ft-layer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .ft-layer-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
+    .ft-layer-header { padding: 14px 18px; display: flex; align-items: center; gap: 10px; }
+    .ft-layer-header.brain { background: linear-gradient(135deg, #EEF9F6, #D1F5EC); border-bottom: 1px solid #A8D4C8; }
+    .ft-layer-header.work  { background: linear-gradient(135deg, #EFF6FF, #DBEAFE); border-bottom: 1px solid #BFDBFE; }
+    .ft-layer-icon { font-size: 1.5rem; }
+    .ft-layer-title { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+    .ft-layer-sub   { font-size: 0.75rem; color: var(--text-muted); margin-top: 1px; }
+    .ft-layer-body  { padding: 14px 16px; }
+    .ft-tree-item   { display: flex; align-items: center; gap: 7px; padding: 5px 6px; border-radius: 5px; cursor: pointer; transition: background 0.1s; }
+    .ft-tree-item:hover { background: var(--primary-light); }
+    .ft-tree-icon   { font-size: 0.95rem; flex-shrink: 0; }
+    .ft-tree-name   { font-size: 0.82rem; color: var(--text-body); }
+    .ft-tree-name.ft-folder  { font-weight: 600; }
+    .ft-tree-name.ft-claude  { font-weight: 700; color: var(--primary-dark); }
+    .ft-tree-badge  { font-size: 0.65rem; font-weight: 700; padding: 1px 6px; border-radius: 8px; flex-shrink: 0; }
+    .ft-badge-key      { background: #FEF3C7; color: #92400E; }
+    .ft-badge-evergreen{ background: var(--primary-light); color: var(--primary-dark); }
+    .ft-badge-scoped   { background: #DBEAFE; color: #1E40AF; }
+    .ft-annotation  { display: none; margin: 2px 6px 6px 28px; padding: 8px 12px; background: var(--bg); border-radius: 6px; border-left: 3px solid var(--primary); font-size: 0.79rem; color: var(--text-muted); line-height: 1.5; }
+    .ft-annotation.visible { display: block; }
+    .ft-claude-callout { margin-top: 14px; padding: 12px 14px; border-radius: var(--radius); background: var(--primary-light); border-left: 3px solid var(--primary); font-size: 0.82rem; color: var(--text-body); line-height: 1.55; }
+    .ft-claude-callout strong { color: var(--primary-dark); }
+    @media (max-width: 620px) { .ft-layer-grid { grid-template-columns: 1fr; } }
+
+    /* ── Cycle tabs ── */
+    .ct-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 24px; }
+    .ct-tab { padding: 9px 18px 11px; font-size: 0.84rem; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; background: none; border-top: none; border-left: none; border-right: none; font-family: var(--font); transition: color 0.15s; white-space: nowrap; }
+    .ct-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .ct-tab:hover { color: var(--text); }
+    .ct-panel { display: none; }
+    .ct-panel.active { display: block; }
+
+    /* Daily cycle steps */
+    .ct-daily { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .ct-step-inner { padding: 18px 14px 14px; border-radius: var(--radius); }
+    .ct-step-inner.morning { background: var(--sun-light); border: 1px solid #F9E08A; }
+    .ct-step-inner.work    { background: var(--primary-light); border: 1px solid #A8D4C8; }
+    .ct-step-inner.close   { background: var(--ocean-light); border: 1px solid #BFDBFE; }
+    .ct-step-emoji { font-size: 1.5rem; margin-bottom: 7px; }
+    .ct-step-title { font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 5px; }
+    .ct-step-cmd { display: inline-block; background: white; border: 1px solid var(--border); border-radius: 4px; font-family: monospace; font-size: 0.73rem; padding: 2px 6px; color: var(--primary-dark); font-weight: 700; margin-bottom: 7px; }
+    .ct-step-bullets { list-style: none; font-size: 0.77rem; color: var(--text-muted); line-height: 1.6; padding: 0; }
+    .ct-step-bullets li::before { content: '· '; color: var(--primary); font-weight: 700; }
+
+    /* Project flow */
+    .ct-pf { display: flex; flex-direction: column; gap: 0; }
+    .ct-pf-row { display: flex; gap: 10px; }
+    .ct-pf-stage { flex: 1; background: var(--white); border: 2px solid var(--border); border-radius: var(--radius); padding: 14px 12px; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+    .ct-pf-stage:hover, .ct-pf-stage.active { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    .ct-pf-stage.validated { border-color: var(--primary); background: var(--primary-light); }
+    .ct-pf-stage.generated { border-color: var(--sand); background: var(--sand-light); }
+    .ct-pf-stage.distilled  { border-color: var(--sand-dark); background: var(--sand-light); }
+    .ct-pf-num { width: 20px; height: 20px; border-radius: 50%; background: var(--primary); color: white; font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 7px; }
+    .ct-pf-stage.generated .ct-pf-num { background: var(--sand); }
+    .ct-pf-stage.distilled  .ct-pf-num { background: var(--sand-dark); }
+    .ct-pf-stage h4 { font-size: 0.82rem; font-weight: 700; margin-bottom: 3px; color: var(--text); }
+    .ct-pf-stage p  { font-size: 0.77rem; color: var(--text-muted); line-height: 1.4; }
+    .ct-pf-folder   { display: inline-block; font-family: monospace; font-size: 0.71rem; background: white; border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; margin-top: 5px; color: var(--primary-dark); font-weight: 600; }
+    .ct-pf-connector { text-align: center; color: var(--text-muted); padding: 4px 0; }
+
+    /* Knowledge flow */
+    .ct-kc { display: grid; grid-template-columns: 1fr 72px 1fr; gap: 12px; align-items: center; }
+    .ct-kc-box { border-radius: var(--radius); padding: 18px 16px; border: 2px solid var(--border); }
+    .ct-kc-box.project-box { background: var(--sand-light); border-color: #F0C9A8; }
+    .ct-kc-box.context-box { background: var(--primary-light); border-color: #A8D4C8; }
+    .ct-kc-box h4 { font-size: 0.88rem; font-weight: 700; margin-bottom: 8px; }
+    .ct-kc-box ul { list-style: none; padding: 0; font-size: 0.79rem; color: var(--text-muted); line-height: 1.7; }
+    .ct-kc-box ul li::before { content: '→ '; font-weight: 700; }
+    .ct-kc-box.project-box ul li::before { color: var(--sand-dark); }
+    .ct-kc-box.context-box ul li::before { color: var(--primary-dark); }
+    .ct-kc-arrows { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 1.1rem; }
+    .ct-kc-label { font-size: 0.68rem; color: var(--text-muted); text-align: center; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; line-height: 1.4; }
+    .ct-wrapup { margin-top: 14px; background: var(--sun-light); border: 1px solid #F9E08A; border-radius: var(--radius); padding: 12px 16px; font-size: 0.82rem; display: flex; align-items: center; gap: 12px; }
+    .ct-wrapup code { color: var(--primary-dark); font-size: 0.85rem; }
+
+    /* Teach it section */
+    .teach-file-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0; }
+    .teach-file-card { background: var(--white); border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 18px 18px; }
+    .teach-file-card.root-claude { border-color: var(--primary); background: var(--primary-light); }
+    .teach-file-card.profile { border-color: var(--sand); background: var(--sand-light); }
+    .teach-file-card.writing { border-color: var(--ocean); background: var(--ocean-light); }
+    .teach-file-card h4 { font-size: 0.92rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .teach-file-card .tf-path { font-family: monospace; font-size: 0.77rem; color: var(--text-muted); margin-bottom: 10px; }
+    .teach-file-card p { font-size: 0.83rem; color: var(--text-body); line-height: 1.55; }
+    @media (max-width: 620px) { .teach-file-grid { grid-template-columns: 1fr; } .ct-daily { grid-template-columns: 1fr; } .ct-kc { grid-template-columns: 1fr; } }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 1.8rem; }
+      .card-grid { grid-template-columns: 1fr; }
+      .compare-grid { grid-template-columns: 1fr; }
+      .compare-vs { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOP NAV ── -->
+<nav class="top-nav" id="top-nav">
+  <a href="#get-started" class="active">Get Started</a>
+  <a href="#what-is-claude-code">What it is</a>
+  <a href="#cost-billing">Cost</a>
+  <a href="#teach-it">Teach It</a>
+  <a href="#workspace-structure">Workspace</a>
+  <a href="#cycle-in-practice">The Cycle</a>
+  <a href="#workflows">Workflows</a>
+  <a href="#best-practices">Best Practices</a>
+  <a href="#mcps">Integrations</a>
+  <a href="#skills">Skills</a>
+  <a href="#faq">FAQ</a>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-badge">Practical Field Guide</div>
+  <h1>Claude Code<br><span>for Non-Developers</span></h1>
+  <p class="sub">A community-built guide to getting real work done with Claude Code. For finance, operations, audit, and anyone who wants to automate, analyze, and build without writing code.</p>
+  <div class="hero-cta-row">
+    <a href="#get-started" class="btn btn-white">Get started (30 min)</a>
+    <a href="#workflows" class="btn btn-outline">See workflows</a>
+  </div>
+  <p class="hero-meta">Built from community experience &amp; weekly knowledge-sharing sessions</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ── CONTENT SECTIONS (Phases 2-5 go here) ── -->
+<!-- ═══════════════════════════════════════════════ -->
+
+<div class="page-wrap" id="page-content">
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION: WHAT IS CLAUDE CODE -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="what-is-claude-code">
+    <h2 class="section-title">What is Claude Code?</h2>
+    <p class="section-subtitle">And why non-developers should care.</p>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">💡</span>
+      <div><strong>The core idea:</strong> Claude Code is like hiring a brilliant new employee who can write code, run queries, build tools, and automate processes. You direct it entirely through conversation, with no programming background required.</div>
+    </div>
+
+    <div class="compare-grid" style="margin-top: 20px;">
+      <div class="compare-card other">
+        <h4>Most AI tools — resets each session</h4>
+        <div class="compare-steps">
+          <div class="cstep">📋 Re-explain your role &amp; context</div>
+          <div class="cstep">🔍 Re-describe your data sources</div>
+          <div class="cstep dim">❌ Your preferences — forgotten</div>
+          <div class="cstep dim">❌ Previous learnings — gone</div>
+        </div>
+      </div>
+      <div class="compare-vs"><div class="vs-badge">VS</div></div>
+      <div class="compare-card cc">
+        <h4>Claude Code — compounds over time</h4>
+        <div class="compare-steps">
+          <div class="cstep highlight">📋 CLAUDE.md loads your context automatically</div>
+          <div class="cstep highlight">🔍 personal-context/ folder ready to use</div>
+          <div class="cstep highlight">✅ Preferences and style remembered</div>
+          <div class="cstep highlight">📈 Learnings stack with each session</div>
+        </div>
+      </div>
+    </div>
+    <div class="compound-callout">
+      <div style="font-size:1.4rem;flex-shrink:0;">🔁</div>
+      <div>
+        <strong style="font-size:0.9rem;color:var(--text);">Context that compounds instead of resetting</strong>
+        <p style="font-size:0.84rem;color:var(--text-muted);margin-top:4px;line-height:1.6;">Every session, Claude Code reads your CLAUDE.md files and personal-context/ folder automatically. What you teach it today is available tomorrow. The more you use it, the better it gets — with no extra effort on your part.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin: 28px 0 4px;">The Knowledge Cycle</h3>
+    <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">The most effective users follow this loop. Click any stage to learn more. Each iteration compounds because what you learn gets captured back into your workspace context.</p>
+
+    <!-- ── Embedded Knowledge Cycle diagram ── -->
+    <div style="background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px 16px; box-shadow: var(--shadow);">
+
+      <div style="position: relative; width: 100%; max-width: 620px; height: 560px; margin: 0 auto;" id="kc-wrap">
+        <svg id="kc-svg" viewBox="0 0 620 560" style="width:100%;height:100%;overflow:visible;">
+          <defs>
+            <radialGradient id="kc-center-grad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#F0FDF4"/>
+              <stop offset="100%" stop-color="#D1FAE5"/>
+            </radialGradient>
+            <marker id="kc-arr-amber"  markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#F59E0B"/></marker>
+            <marker id="kc-arr-teal"   markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#00A699"/></marker>
+            <marker id="kc-arr-orange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#F97316"/></marker>
+            <marker id="kc-arr-coral"  markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#FF5A5F"/></marker>
+            <marker id="kc-arr-purple" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#7C3AED"/></marker>
+          </defs>
+          <style>
+            .kc-spin { animation: kc-spin-slow 28s linear infinite; transform-origin: 310px 280px; }
+            .kc-pulse { animation: kc-pulse-ring 3s ease-in-out infinite; }
+            @keyframes kc-spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+            @keyframes kc-pulse-ring { 0%,100% { opacity:0.4; } 50% { opacity:0.8; } }
+          </style>
+          <circle class="kc-spin" cx="310" cy="280" r="218" fill="none" stroke="#E5E7EB" stroke-width="1.5" stroke-dasharray="8 6"/>
+          <circle cx="310" cy="280" r="160" fill="none" stroke="#F3F4F6" stroke-width="28"/>
+          <circle class="kc-pulse" cx="310" cy="280" r="155" fill="none" stroke="#D1FAE5" stroke-width="2"/>
+          <circle cx="310" cy="280" r="78" fill="url(#kc-center-grad)" stroke="#A7F3D0" stroke-width="2"/>
+          <path d="M 358,72  Q 470,100 522,178" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" marker-end="url(#kc-arr-amber)" opacity="0.7"/>
+          <path d="M 534,234  Q 544,350 463,440" fill="none" stroke="#00A699" stroke-width="2.5" stroke-linecap="round" marker-end="url(#kc-arr-teal)" opacity="0.7"/>
+          <path d="M 407,464  Q 310,488 213,464" fill="none" stroke="#F97316" stroke-width="2.5" stroke-linecap="round" marker-end="url(#kc-arr-orange)" opacity="0.7"/>
+          <path d="M 157,440  Q 76,350 86,234" fill="none" stroke="#FF5A5F" stroke-width="2.5" stroke-linecap="round" marker-end="url(#kc-arr-coral)" opacity="0.7"/>
+          <path d="M 98,178  Q 100,60 262,60" fill="none" stroke="#7C3AED" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 4" marker-end="url(#kc-arr-purple)" opacity="0.85"/>
+        </svg>
+        <!-- Center label -->
+        <div style="position:absolute;left:310px;top:280px;transform:translate(-50%,-50%);width:110px;text-align:center;pointer-events:none;z-index:5;">
+          <div style="font-size:1.8rem;">🧠</div>
+          <div style="font-size:0.72rem;font-weight:700;color:#1F2937;line-height:1.3;margin-top:4px;">Your Knowledge<br>Base</div>
+          <div style="font-size:0.62rem;color:#00A699;font-weight:600;margin-top:3px;">grows each loop</div>
+        </div>
+      </div>
+
+      <!-- Detail panel -->
+      <div id="kc-detail" style="max-width:760px;margin:16px auto 0;background:#F9FAFB;border:2px solid #E5E7EB;border-radius:12px;padding:20px 24px;min-height:100px;transition:border-color 0.2s;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+          <div id="kc-dp-icon" style="width:44px;height:44px;border-radius:10px;background:#F3F4F6;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">👆</div>
+          <div>
+            <div id="kc-dp-title" style="font-size:1rem;font-weight:700;color:#1F2937;">Select a stage to explore it</div>
+            <span id="kc-dp-tag" style="font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:10px;background:#F3F4F6;color:#6B7280;">Click any node in the diagram</span>
+          </div>
+        </div>
+        <p id="kc-dp-body" style="font-size:0.87rem;color:#6B7280;line-height:1.65;margin-bottom:10px;">Each stage has a clear role and a clear owner. Some steps are where AI adds the most speed; others are where your expertise is irreplaceable.</p>
+        <div id="kc-dp-meta" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+      </div>
+
+      <!-- Compounding strip -->
+      <div style="max-width:760px;margin:14px auto 0;background:linear-gradient(135deg,#ECFDF5,#EDE9FE);border:1px solid #D1FAE5;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:16px;">
+        <div style="font-size:1.4rem;flex-shrink:0;">🔁</div>
+        <div>
+          <div style="font-size:0.88rem;font-weight:700;color:#1F2937;margin-bottom:3px;">Why this is a flywheel, not just a loop</div>
+          <div style="font-size:0.82rem;color:#6B7280;line-height:1.55;">Each time you complete a cycle and run <strong style="color:#00A699;">/wrapup</strong>, learnings get written to <strong style="color:#00A699;">personal-context/</strong>. The next session loads that context automatically. Session 10 starts smarter than Session 1 without extra effort.</div>
+        </div>
+        <div id="kc-loop-dots" style="margin-left:auto;flex-shrink:0;display:flex;gap:5px;align-items:center;"></div>
+      </div>
+
+    </div><!-- end diagram card -->
+
+    <div class="callout callout-info">
+      <span class="callout-icon">ℹ️</span>
+      <div>Claude Code is <strong>non-deterministic</strong>, meaning it won't run the same pipeline the same way every time. Always review outputs before treating them as final, especially for critical processes.</div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION: COST & BILLING -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="cost-billing">
+    <h2 class="section-title">Cost and Billing</h2>
+    <p class="section-subtitle">Claude Code is not a flat subscription. Here's how pricing works.</p>
+
+    <div class="card">
+      <ul style="font-size: 0.87rem; line-height: 2.2; margin-left: 20px; color: var(--text-body);">
+        <li><strong>Pay-per-use.</strong> Claude Code charges by token (roughly, by how much text is read and generated). Longer sessions with more tool use cost more.</li>
+        <li><strong>Model tier matters.</strong> Opus is the most capable and most expensive. Sonnet is the default and a good balance. Haiku is the cheapest, best for simple tasks.</li>
+        <li><strong>Check your spend.</strong> Type <code>/cost</code> during any session to see how much you've used so far.</li>
+        <li><strong>Set limits.</strong> You can configure spending limits in your Anthropic account to avoid surprises.</li>
+        <li><strong>Context = cost.</strong> Every file Claude Code reads, every tool it calls, and every response it generates adds to the token count. Keep sessions focused and use <code>/compact</code> to reduce context when a session gets long.</li>
+      </ul>
+    </div>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">💡</span>
+      <div>For cost-conscious workflows, start with Sonnet (the default) and only switch to Opus for tasks that genuinely need deeper reasoning. Use <code>/cost</code> regularly until you develop an intuition for what sessions cost.</div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION: GET STARTED (DAY 1 STEPPER) -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="get-started">
+    <h2 class="section-title">Get Started: Your First 30 Minutes</h2>
+    <p class="section-subtitle">Five steps. By the end, you'll have Claude Code running, configured safely, and ready for your first real task.</p>
+
+    <div class="stepper">
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Install Claude Code <span class="tag tag-amber" style="font-size: 0.72rem; margin-left: 6px;">~5 min</span></h3>
+          <p>Claude Code is available in several forms. Pick the one that fits how you work:</p>
+
+          <div class="card-grid" style="margin: 12px 0;">
+            <div class="card">
+              <h3>Desktop App (easiest)</h3>
+              <p>Download the Mac or Windows app. No terminal required. Best starting point for non-developers.</p>
+            </div>
+            <div class="card">
+              <h3>Web App</h3>
+              <p>Run Claude Code in your browser at claude.ai/code. No install needed, works on any platform.</p>
+            </div>
+            <div class="card">
+              <h3>VS Code Extension</h3>
+              <p>Search "Claude Code" in the VS Code Extensions marketplace. Integrates directly into your editor.</p>
+            </div>
+            <div class="card">
+              <h3>Terminal (npm)</h3>
+              <p>For power users: <code>npm install -g @anthropic-ai/claude-code</code>, then run <code>claude</code> from any terminal.</p>
+            </div>
+          </div>
+
+          <div class="callout callout-info" style="margin-top: 10px;">
+            <span class="callout-icon">ℹ️</span>
+            <div><strong>Terminal install requirements:</strong> Node.js 18+. Install from <a href="https://nodejs.org" target="_blank" style="color: var(--info);">nodejs.org</a> if needed. The desktop app and web app have no prerequisites.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Open in the Right Folder <span class="tag tag-amber" style="font-size: 0.72rem; margin-left: 6px;">~3 min</span></h3>
+          <div class="callout callout-warn" style="margin-bottom: 10px;">
+            <span class="callout-icon">⚠️</span>
+            <div><strong>Most common beginner mistake:</strong> Opening Claude Code in a root or overly broad directory. It scans everything and gets confused. Always open at a specific project folder.</div>
+          </div>
+          <p><strong>Do this:</strong></p>
+          <ol style="font-size: 0.87rem; color: var(--text-muted); margin: 8px 0 8px 20px; line-height: 2;">
+            <li>Open VS Code (or your preferred terminal)</li>
+            <li>Navigate to a specific project folder: <code>cd ~/my-projects/my-analysis</code></li>
+            <li>Run <code>claude</code> and it launches with context from that folder only</li>
+          </ol>
+          <p style="font-size: 0.87rem; color: var(--text-muted);">Create one folder per project. Name it clearly. Claude Code uses the folder structure to understand scope and stay focused.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Configure Your Permissions <span class="tag tag-amber" style="font-size: 0.72rem; margin-left: 6px;">~5 min</span></h3>
+          <p>Before your first session, set up a safe default config. This way Claude Code won't ask permission for every small thing, but it also won't have blanket access to your system.</p>
+          <p style="margin: 8px 0 4px; font-size: 0.87rem;"><strong>Create or open:</strong> <code>~/.claude/settings.json</code></p>
+          <pre>{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write(/Users/yourname/Projects/**)",
+      "Bash(ls:*)",
+      "Bash(echo:*)"
+    ]
+  }
+}</pre>
+          <p style="font-size: 0.87rem; color: var(--text-muted);">Replace <code>yourname</code> with your Mac username. This allows reading any file, writing only inside your Projects folder, and running safe terminal commands. Everything else will ask for approval first.</p>
+          <div class="callout callout-tip" style="margin-top: 10px;">
+            <span class="callout-icon">💡</span>
+            <div>You can manage permissions conversationally: ask Claude Code <em>"Please add the permission you just requested to my local config"</em> and it will update the file for you.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Teach It Who You Are <span class="tag tag-amber" style="font-size: 0.72rem; margin-left: 6px;">~10 min</span></h3>
+          <p>Create a <code>CLAUDE.md</code> file in your project folder (or globally at <code>~/.claude/CLAUDE.md</code>). Claude Code reads it automatically every session, so you never re-explain your role, preferences, or data sources.</p>
+          <p style="font-size: 0.87rem; color: var(--text-muted); margin-top: 8px;">The more context you give it upfront, the better it performs from day one. See the full guide, templates, and seed prompts in the <a href="#teach-it" style="color:var(--primary-dark);">Teach It to Know You</a> section below.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h3>Run Your First Task <span class="tag tag-amber" style="font-size: 0.72rem; margin-left: 6px;">~10 min</span></h3>
+          <p>Try something real. Here are three good first prompts depending on what you want to do:</p>
+
+          <p style="font-weight: 700; font-size: 0.87rem; color: var(--text); margin: 14px 0 6px;">If you want to analyze data:</p>
+          <div class="prompt-box"><p>I need to analyze last month's expense reports. I have CSV files in my Downloads folder. Can you start by listing what's there and suggesting how to combine them into a single summary?</p></div>
+
+          <p style="font-weight: 700; font-size: 0.87rem; color: var(--text); margin: 14px 0 6px;">If you want to automate a task:</p>
+          <div class="prompt-box"><p>I do this manually every week: [describe your process]. I want to turn this into a repeatable workflow. Let's start by walking through the steps so you understand the pattern.</p></div>
+
+          <p style="font-weight: 700; font-size: 0.87rem; color: var(--text); margin: 14px 0 6px;">If you just want to explore:</p>
+          <div class="prompt-box"><p>I'm new to Claude Code. What can I do from this folder? What files are here, and what would be a good first task to try together?</p></div>
+
+          <div class="callout callout-success" style="margin-top: 14px;">
+            <span class="callout-icon">✅</span>
+            <div><strong>You're set up.</strong> From here, explore the Workflows section for guided use cases, or browse the Skills section to find reusable automations.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Quick reference card -->
+    <div class="card" style="margin-top: 24px; background: var(--teal-light); border-color: #99F6E4;">
+      <h3 style="color: var(--teal-dark);">Quick Reference - Essential Commands</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-top: 12px;">
+        <div style="font-size: 0.84rem;"><code>/model</code> -switch AI model</div>
+        <div style="font-size: 0.84rem;"><code>/resume</code> -recover previous session</div>
+        <div style="font-size: 0.84rem;"><code>/context</code> -see context window usage</div>
+        <div style="font-size: 0.84rem;"><code>/cost</code> -see token cost so far</div>
+        <div style="font-size: 0.84rem;"><code>/rename</code> -name the current session</div>
+        <div style="font-size: 0.84rem;"><code>/insights</code> -personalized prompting tips</div>
+        <div style="font-size: 0.84rem;"><code>/terminal-setup</code> -enable Shift+Enter multiline</div>
+        <div style="font-size: 0.84rem;"><kbd>ESC ESC</kbd> -fork from a previous point</div>
+      </div>
+    </div>
+
+    <div class="callout callout-warn" style="margin-top: 16px;">
+      <span class="callout-icon">⚠️</span>
+      <div><strong>Back up your work regularly.</strong> Claude Code can occasionally delete or overwrite files unexpectedly. Commit to git or save to cloud storage at every stable checkpoint, especially before large tasks.</div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION: TEACH IT TO KNOW YOU -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="teach-it">
+    <h2 class="section-title">Teach It to Know You</h2>
+    <p class="section-subtitle">Three files that transform Claude Code from a generic assistant into one that knows your work.</p>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">💡</span>
+      <div><strong>The core idea:</strong> Claude Code reads a handful of markdown files automatically at the start of every session. Fill them in once, and you never have to re-explain yourself again. These files are your "working memory" for the AI.</div>
+    </div>
+
+    <div class="teach-file-grid">
+      <div class="teach-file-card root-claude" style="grid-column: 1 / -1;">
+        <h4>📋 Root CLAUDE.md</h4>
+        <div class="tf-path">~/.claude/CLAUDE.md &nbsp;&nbsp;or&nbsp;&nbsp; ~/your-workspace/CLAUDE.md</div>
+        <p>The most important file in your setup. It tells Claude Code who you are, what you work on, where your data lives, and how you like to communicate. Without it, you re-explain yourself every session. With it, every session starts with full context.</p>
+        <pre style="margin-top: 12px; font-size: 0.78rem;"># CLAUDE.md — [Your Name]
+
+## Who I Am
+Name: [Your name]
+Title: [Your role]
+Team: [Your team / department]
+Focus: [1–2 sentences describing your work]
+
+## Preferences
+- Communication: [Direct / narrative / detailed]
+- Output format: [Bullets / prose / tables]
+- When in doubt, ask me before making changes to files
+
+## Where Things Live
+- Active projects: ~/projects/[name]/
+- Permanent knowledge: ~/personal-context/</pre>
+        <div class="callout callout-tip" style="margin-top: 12px;">
+          <span class="callout-icon">💡</span>
+          <div><strong>Seed prompt:</strong> <em>"Look at my CLAUDE.md and suggest what's missing. What context would make you more effective for someone in my role?"</em></div>
+        </div>
+      </div>
+
+      <div class="teach-file-card profile">
+        <h4>👤 my-profile.md</h4>
+        <div class="tf-path">personal-context/my-profile.md</div>
+        <p>Your role, background, and domain expertise. This helps Claude Code calibrate how to explain things — it won't over-explain basics you know cold, or assume expertise you don't have.</p>
+        <p style="margin-top: 8px; font-size: 0.81rem; color: var(--text-muted);">Include: your team's scope, the systems you work in, the data you rely on, common stakeholders, and anything that defines how you do your work.</p>
+        <div class="callout callout-tip" style="margin-top: 12px;">
+          <span class="callout-icon">💡</span>
+          <div><strong>Seed prompt:</strong> <em>"Ask me 5 questions and use my answers to write a my-profile.md for me."</em></div>
+        </div>
+      </div>
+
+      <div class="teach-file-card writing">
+        <h4>✍️ my-writing-style.md</h4>
+        <div class="tf-path">personal-context/my-writing-style.md</div>
+        <p>Your tone, format preferences, and phrases to avoid. Used when Claude Code drafts emails, summaries, or documents on your behalf. The output should sound like you, not like a generic AI.</p>
+        <p style="margin-top: 8px; font-size: 0.81rem; color: var(--text-muted);">Include: preferred register (formal/casual), bullet vs prose, things you never say, how you sign off emails, how detailed your summaries tend to be.</p>
+        <div class="callout callout-tip" style="margin-top: 12px;">
+          <span class="callout-icon">💡</span>
+          <div><strong>Seed prompt:</strong> <em>"Read the emails in [folder] and draft a writing-style.md that captures how I communicate."</em></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-info" style="margin-top: 4px;">
+      <span class="callout-icon">ℹ️</span>
+      <div>You can also add a <strong>CLAUDE.md per project folder</strong> with details specific to that work: the goal, key data sources, open questions, and any domain gotchas. Update it as you learn. See the <a href="#workspace-structure" style="color:var(--ocean);">Workspace Structure</a> section for how to organize these.</div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION: WORKSPACE STRUCTURE -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="workspace-structure">
+    <h2 class="section-title">Your Workspace Structure</h2>
+    <p class="section-subtitle">Two layers that keep personal knowledge separate from project work — so context accumulates without cluttering.</p>
+
+    <div id="ft-layer-grid" class="ft-layer-grid"></div>
+
+    <div class="callout callout-success" style="margin-top: 16px;">
+      <span class="callout-icon">✅</span>
+      <div><strong>The pattern that works:</strong> personal-context/ grows forever and never deletes. Projects have a clear endpoint and eventually archive. Knowledge flows one direction — from projects into personal-context/ — which is what makes the system compound.</div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION: HOW THE CYCLE PLAYS OUT -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="cycle-in-practice">
+    <h2 class="section-title">How the Cycle Plays Out</h2>
+    <p class="section-subtitle">Three views of the same compounding loop: daily, project-level, and across your whole knowledge base.</p>
+
+    <div class="card" style="padding: 24px 24px 20px;">
+      <div class="ct-tabs">
+        <button class="ct-tab active" data-panel="daily">Daily Rhythm</button>
+        <button class="ct-tab" data-panel="project">Project Lifecycle</button>
+        <button class="ct-tab" data-panel="knowledge">Knowledge Flow</button>
+      </div>
+
+      <!-- DAILY RHYTHM -->
+      <div class="ct-panel active" id="ct-panel-daily">
+        <div class="ct-daily">
+          <div class="ct-step-inner morning">
+            <div class="ct-step-emoji">☀️</div>
+            <div class="ct-step-title">Morning Setup</div>
+            <div class="ct-step-cmd">/standup</div>
+            <ul class="ct-step-bullets">
+              <li>Context loads from CLAUDE.md</li>
+              <li>Review calendar + open items</li>
+              <li>Set top 3 priorities</li>
+              <li>Start from where you left off</li>
+            </ul>
+          </div>
+          <div class="ct-step-inner work">
+            <div class="ct-step-emoji">🔧</div>
+            <div class="ct-step-title">Active Work</div>
+            <div class="ct-step-cmd">project session</div>
+            <ul class="ct-step-bullets">
+              <li>Query and explore data</li>
+              <li>Analyze findings</li>
+              <li>Generate outputs</li>
+              <li>Validate results</li>
+            </ul>
+          </div>
+          <div class="ct-step-inner close">
+            <div class="ct-step-emoji">🌙</div>
+            <div class="ct-step-title">Day Close</div>
+            <div class="ct-step-cmd">/wrapup</div>
+            <ul class="ct-step-bullets">
+              <li>Distills key learnings</li>
+              <li>Updates project context</li>
+              <li>Flags open questions</li>
+              <li>Feeds next session</li>
+            </ul>
+          </div>
+        </div>
+        <div style="margin-top: 16px; background: linear-gradient(90deg, var(--sand-light), var(--primary-light)); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; display: flex; align-items: center; gap: 12px; font-size: 0.82rem;">
+          <span style="font-size: 1rem; color: var(--primary);">↑</span>
+          <span style="color: var(--text-body);">Insights from the work session get captured by <strong>/wrapup</strong> into <strong>personal-context/</strong> — so the next session starts smarter than the last.</span>
+        </div>
+      </div>
+
+      <!-- PROJECT LIFECYCLE -->
+      <div class="ct-panel" id="ct-panel-project">
+        <div class="ct-pf">
+          <div class="ct-pf-row">
+            <div class="ct-pf-stage" onclick="this.classList.toggle('active')">
+              <div class="ct-pf-num">1</div>
+              <h4>Understand the Problem</h4>
+              <p>Define the question. What are you trying to answer? What data sources are relevant? What does "done" look like?</p>
+              <span class="ct-pf-folder">CLAUDE.md ← document your goal</span>
+            </div>
+            <div class="ct-pf-stage" onclick="this.classList.toggle('active')">
+              <div class="ct-pf-num">2</div>
+              <h4>Explore &amp; Query</h4>
+              <p>Use AI to surface relevant data, draft exploratory queries, and identify patterns. Your domain knowledge guides what's plausible.</p>
+              <span class="ct-pf-folder">queries/ ← drafts land here</span>
+            </div>
+          </div>
+          <div class="ct-pf-connector">↓</div>
+          <div class="ct-pf-row">
+            <div class="ct-pf-stage validated" onclick="this.classList.toggle('active')">
+              <div class="ct-pf-num">3</div>
+              <h4>Validate</h4>
+              <p>Cross-check outputs against known benchmarks. Do the numbers make sense? This step cannot be delegated.</p>
+              <span class="ct-pf-folder">queries/ ← promoted after validation</span>
+            </div>
+            <div class="ct-pf-stage generated" onclick="this.classList.toggle('active')">
+              <div class="ct-pf-num">4</div>
+              <h4>Generate Output</h4>
+              <p>Produce the deliverable: report, dashboard, summary. AI drafts it; you verify before sharing.</p>
+              <span class="ct-pf-folder">output/ ← AI-generated, verify first</span>
+            </div>
+          </div>
+          <div class="ct-pf-connector">↓</div>
+          <div class="ct-pf-row">
+            <div class="ct-pf-stage" onclick="this.classList.toggle('active')" style="flex:0.5">
+              <div class="ct-pf-num">5</div>
+              <h4>Document Findings</h4>
+              <p>Write down what you learned — what worked, what the data showed, any gotchas.</p>
+              <span class="ct-pf-folder">analysis/</span>
+            </div>
+            <div class="ct-pf-stage distilled" onclick="this.classList.toggle('active')" style="flex:0.5">
+              <div class="ct-pf-num">6</div>
+              <h4>Distill &amp; Archive</h4>
+              <p>Key learnings move to <strong>personal-context/</strong>. Project archives. Knowledge persists forever.</p>
+              <span class="ct-pf-folder">personal-context/knowledge/</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:14px;margin-top:14px;flex-wrap:wrap;font-size:0.79rem;">
+          <div style="display:flex;align-items:center;gap:6px;color:var(--text-muted);"><div style="width:10px;height:10px;border-radius:50%;background:var(--primary);flex-shrink:0;"></div> Validated (trusted)</div>
+          <div style="display:flex;align-items:center;gap:6px;color:var(--text-muted);"><div style="width:10px;height:10px;border-radius:50%;background:var(--sand);flex-shrink:0;"></div> Generated (verify before use)</div>
+          <div style="display:flex;align-items:center;gap:6px;color:var(--text-muted);"><div style="width:10px;height:10px;border-radius:50%;background:var(--sand-dark);flex-shrink:0;"></div> Distilled (permanent)</div>
+        </div>
+      </div>
+
+      <!-- KNOWLEDGE FLOW -->
+      <div class="ct-panel" id="ct-panel-knowledge">
+        <div class="ct-kc">
+          <div class="ct-kc-box project-box">
+            <h4>🔬 Projects</h4>
+            <ul>
+              <li>Raw queries (SQL, scripts)</li>
+              <li>Investigation notes</li>
+              <li>Domain gotchas discovered</li>
+              <li>Validated findings</li>
+              <li>Stakeholder context</li>
+            </ul>
+          </div>
+          <div class="ct-kc-arrows">
+            <span style="color:var(--primary);font-size:1.2rem;">↑</span>
+            <div class="ct-kc-label">distill<br>on close</div>
+            <span style="color:var(--text-muted);font-size:1rem;">↓</span>
+            <div class="ct-kc-label" style="color:var(--text-muted);">loads at<br>session start</div>
+          </div>
+          <div class="ct-kc-box context-box">
+            <h4>🧠 Personal Context</h4>
+            <ul>
+              <li>Reusable business rules</li>
+              <li>Data quirks and gotchas</li>
+              <li>Table and field definitions</li>
+              <li>Domain knowledge</li>
+              <li>Your preferences &amp; style</li>
+            </ul>
+          </div>
+        </div>
+        <div class="ct-wrapup">
+          <code>/wrapup</code>
+          <p style="font-size:0.82rem;color:var(--text-muted);line-height:1.5;">Run this at the end of every significant session. It reviews what was built, surfaces what's worth keeping, and writes it to the right place — so knowledge compounds instead of disappearing when the conversation ends.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION: WORKFLOWS -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="workflows">
+    <h2 class="section-title">Guided Workflows</h2>
+    <p class="section-subtitle">Step-by-step patterns for common non-developer use cases.</p>
+
+    <div class="accordion">
+
+      <div class="accordion-item open">
+        <div class="accordion-header">
+          <h3>🔄 Workflow 1: Your First Session</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom: 10px;"><strong>Goal:</strong> Get Claude Code open and run a real task end-to-end.</p>
+          <ol style="margin-left: 20px; line-height: 2.2; font-size: 0.88rem;">
+            <li>Open a specific project folder in VS Code or terminal</li>
+            <li>Run <code>claude</code> from within that folder</li>
+            <li>Tell Claude Code what to work with: e.g., <em>"Search my project files for..."</em> or <em>"Query the database for..."</em></li>
+            <li>Review results before letting it make any changes to files</li>
+            <li>Before ending your session, back up any important files</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>⚙️ Workflow 2: Recurring Task Automation</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom: 10px;"><strong>Goal:</strong> Turn a repeated manual process into a one-command skill.</p>
+          <ol style="margin-left: 20px; line-height: 2.2; font-size: 0.88rem;">
+            <li>Do the task manually once and note every step</li>
+            <li>Write a CLAUDE.md describing the task, inputs, and expected outputs</li>
+            <li>Run the task with Claude Code and let it learn the pattern</li>
+            <li>Ask Claude Code to turn the workflow into a skill (<code>skills/&lt;name&gt;/&lt;name&gt;.md</code>)</li>
+            <li>Test the skill on a new instance of the task</li>
+            <li>Share with teammates if broadly useful</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>📊 Workflow 3: Data Analysis + Report</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom: 10px;"><strong>Goal:</strong> Query data, analyze it, produce a formatted output (Sheets / Doc / Slides).</p>
+          <ol style="margin-left: 20px; line-height: 2.2; font-size: 0.88rem;">
+            <li>Open Claude Code in your project folder</li>
+            <li>Tell it where the data is: <em>"Query [table/file] for [date range/criteria]"</em></li>
+            <li>Ask for analysis, enrichments, or commentary on the result</li>
+            <li>Ask Claude Code to format the output as a Google Sheet / Doc / Slides via Apps Script</li>
+            <li>Review and share the output</li>
+          </ol>
+          <div class="callout callout-tip" style="margin-top: 10px;">
+            <span class="callout-icon">💡</span>
+            <div>Tell Claude Code the <em>destination</em> upfront. Saying "I'm building this for a Google Doc" causes it to automatically embed the right formatting and structure.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>🔔 Workflow 4: Building a Monitoring Alert</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom: 10px;"><strong>Goal:</strong> Automatically check a condition and notify stakeholders.</p>
+          <ol style="margin-left: 20px; line-height: 2.2; font-size: 0.88rem;">
+            <li>Define what you want to monitor (e.g., invoices not matched, approvals overdue)</li>
+            <li>Ask Claude Code to write a script that queries the data and checks the condition</li>
+            <li>Test the script manually and verify results</li>
+            <li>Ask Claude Code to set up a cron job to run it on a schedule</li>
+            <li>Add email or Slack notification as output</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>💬 Workflow 5: Formatted Slack Message</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom: 10px;"><strong>Goal:</strong> Send a professional, well-formatted Slack announcement.</p>
+          <ol style="margin-left: 20px; line-height: 2.2; font-size: 0.88rem;">
+            <li>Draft the content of your message (bullet points, key info)</li>
+            <li>Tell Claude Code: <em>"Using Slack Block Kit, format this as a Slack message: [paste content]"</em></li>
+            <li>Claude Code returns Block Kit JSON</li>
+            <li>Preview in Slack's Block Kit Builder (optional)</li>
+            <li>Post to Slack</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>🌐 Workflow 6: Build a Website or Dashboard</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom: 10px;"><strong>Goal:</strong> Publish an HTML page for documentation, reporting, or a prototype.</p>
+          <ol style="margin-left: 20px; line-height: 2.2; font-size: 0.88rem;">
+            <li>Describe what the page should contain and who the audience is</li>
+            <li>Ask Claude Code to build it as a self-contained HTML file</li>
+            <li>Review the output in a browser</li>
+            <li>Publish via GitHub Pages or paste into Google Sites</li>
+            <li>Share the URL</li>
+          </ol>
+          <div class="callout callout-tip" style="margin-top: 10px;">
+            <span class="callout-icon">💡</span>
+            <div>Non-technical users have built polished browser tools through purely conversational prompting. Just keep describing what you want and iterating.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>📋 Workflow 7: Meeting Transcript to Action List</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom: 10px;"><strong>Goal:</strong> Turn a meeting recording into an organized task list.</p>
+          <ol style="margin-left: 20px; line-height: 2.2; font-size: 0.88rem;">
+            <li>Download or copy the transcript from your meeting</li>
+            <li>Open Claude Code in your project folder</li>
+            <li>Tell Claude Code: <em>"Here is a meeting transcript -make me a checklist of action items"</em></li>
+            <li>Review and refine the checklist</li>
+            <li>Tell Claude Code: <em>"Send these tasks to Asana"</em> (requires Asana MCP)</li>
+            <li>All action items land in your task manager with no manual entry</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>🧠 Workflow 8: Session with Memory (Notebook Brain)</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom: 10px;"><strong>Goal:</strong> Use Claude Code across sessions without losing context.</p>
+          <ol style="margin-left: 20px; line-height: 2.2; font-size: 0.88rem;">
+            <li>Create a <code>personal-context/</code> folder with a CLAUDE.md</li>
+            <li>Add domain knowledge, data definitions, and your profile to the folder</li>
+            <li>At the start of each session, Claude Code reads the folder for context</li>
+            <li>At the end of the session, run <code>/wrapup</code> to save what was learned</li>
+            <li>Over time, the folder becomes richer and Claude Code gets more effective</li>
+          </ol>
+          <pre>personal-context/
+  knowledge/         # Domain knowledge, business rules
+  context/           # Table definitions, data dictionaries
+  procedures/        # Runbooks, how-tos
+  my-profile.md      # Who you are, your role, preferences</pre>
+          <div class="callout callout-info" style="margin-top: 12px;">
+            <span class="callout-icon">ℹ️</span>
+            <div><strong>Built-in memory:</strong> Claude Code also has a native auto-memory system at <code>~/.claude/projects/*/memory/</code>. It automatically saves things you ask it to remember across sessions. The manual <code>personal-context/</code> approach above gives you more control and structure, but the built-in memory works with zero setup.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION: BEST PRACTICES -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="best-practices">
+    <h2 class="section-title">Best Practices</h2>
+    <p class="section-subtitle">Distilled from community experience. The patterns that consistently produce the best results.</p>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 12px;">Folder &amp; Context Management</h3>
+    <div class="card">
+      <ul style="font-size: 0.87rem; line-height: 2.2; margin-left: 20px; color: var(--text-body);">
+        <li><strong>Open at the right level.</strong> Always open in a specific project folder. Broad or root-level folders degrade performance and cause context noise.</li>
+        <li><strong>Organize by project.</strong> Keep each project in its own folder with its own CLAUDE.md. Claude Code uses the folder structure to understand scope.</li>
+        <li><strong>Keep CLAUDE.md files focused.</strong> More is not better. Keep instructions specific and concise, and cut anything that isn't actively useful.</li>
+        <li><strong>Put the most important instructions at the TOP</strong> of your CLAUDE.md. Claude Code reads top-down, so context at the top carries more weight.</li>
+        <li><strong>Keep files lightweight.</strong> Every session reads the folder contents. Bloated folders = slower, noisier sessions.</li>
+      </ul>
+    </div>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin: 20px 0 12px;">Prompting</h3>
+    <div class="card">
+      <ul style="font-size: 0.87rem; line-height: 2.2; margin-left: 20px; color: var(--text-body);">
+        <li><strong>Specify your knowledge source explicitly.</strong> Tell Claude Code whether to search the web, query a database, or read local files. Never let it guess.</li>
+        <li><strong>Be precise about desired output format.</strong> If you want a Google Doc, a spreadsheet, or a Slack message, say so upfront.</li>
+        <li><strong>For repeat tasks, build context files.</strong> Structured folders and MD files for recurring work (month-end processes, regular reports) make sessions dramatically more effective.</li>
+        <li><strong>Tell Claude Code the destination.</strong> Say "I'm building this for Google Sites" and it will automatically embed the right style definitions and format output for that platform.</li>
+        <li><strong>Use <code>@</code> to attach files directly.</strong> Type <code>@/path/to/file</code> in your prompt to give Claude Code immediate access to a specific file. In the VS Code extension, you can also drag and drop files into the input.</li>
+      </ul>
+    </div>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin: 20px 0 12px;">Multi-Perspective Review</h3>
+    <div class="card">
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 10px;">Before sharing any doc, proposal, or analysis, ask Claude Code to review it from multiple perspectives:</p>
+      <div class="prompt-box">
+        <p>Review this from different perspectives:<br>
+        (1) a senior expert who will question the technical details<br>
+        (2) someone new to this area who doesn't know the jargon<br>
+        (3) a skeptic who thinks we don't need this<br>
+        (4) an executive who needs to understand the impact and risks</p>
+      </div>
+      <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 8px;">"Review this doc" → generic feedback. "Review this as someone who…" → specific, actionable issues you were too close to see.</p>
+    </div>
+
+    <div class="callout callout-tip" style="margin: 4px 0 20px;">
+      <span class="callout-icon">💡</span>
+      <div>For the full knowledge base approach — file structure, CLAUDE.md templates, and how to use <code>/wrapup</code> — see <a href="#workspace-structure" style="color:var(--primary);">Workspace Structure</a> and <a href="#teach-it" style="color:var(--primary);">Teach It to Know You</a> above.</div>
+    </div>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin: 20px 0 12px;">Backing Up &amp; Safety</h3>
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <div>
+        <strong>Back up regularly.</strong> Claude Code can unexpectedly delete or overwrite files. This is a known risk with any AI coding tool.
+        <ul style="margin-top: 8px; margin-left: 16px; line-height: 1.9;">
+          <li>Checkpoint your work at every stable point. When something is "pretty good," commit or save it before continuing</li>
+          <li>Use git for version control. Pushing to a branch protects you from accidental overwrites</li>
+          <li>At the start of large tasks, explicitly ask Claude Code to save a backup first</li>
+          <li>Use <strong>hooks</strong> to add automatic guardrails. For example, you can configure a hook that auto-commits before Claude Code makes large edits, giving you a rollback point. Hooks are shell commands that run automatically before or after specific tool calls.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin: 20px 0 12px;">What NOT to Do</h3>
+    <div class="card">
+      <ul style="font-size: 0.87rem; line-height: 2.2; margin-left: 20px; color: var(--text-body);">
+        <li>Don't open Claude Code at root or a broad directory level</li>
+        <li>Don't install plugins/MCPs liberally. Start with just what you need and add more as you go</li>
+        <li>Don't blindly install software Claude Code recommends. Understand what it does first</li>
+        <li>Don't give Claude Code blanket full permissions. Configure <code>settings.json</code> deliberately</li>
+        <li>Don't rely on Claude Code alone as your backup. Save important work externally too</li>
+        <li>Don't let Claude Code choose its knowledge source. Always specify where to look</li>
+        <li>Don't use tokens inefficiently. If a CLI is available for a tool, it's often more efficient than an MCP</li>
+      </ul>
+    </div>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin: 20px 0 12px;">Scheduling &amp; Automation</h3>
+    <div class="card">
+      <p style="font-size: 0.87rem; color: var(--text-muted); margin-bottom: 8px;">Claude Code supports cron jobs for automated recurring tasks:</p>
+      <ul style="font-size: 0.87rem; line-height: 2.2; margin-left: 20px; color: var(--text-body);">
+        <li>Daily news scans → automated market summary delivered each morning</li>
+        <li>Weekly status reports → auto-drafted from Slack/doc activity</li>
+        <li>Alert monitoring → automatic notification when conditions are met</li>
+      </ul>
+      <p style="font-size: 0.87rem; color: var(--text-muted); margin-top: 8px;">Ask Claude Code: <em>"Set up a cron job to run this script every Monday at 8am"</em></p>
+    </div>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin: 20px 0 12px;">Reducing Token Usage</h3>
+    <div class="card">
+      <ul style="font-size: 0.87rem; line-height: 2.2; margin-left: 20px; color: var(--text-body);">
+        <li>Type <code>/context</code> to see a graphical view of context window usage</li>
+        <li>Type <code>/cost</code> to see token cost so far in the session</li>
+        <li>Start new sessions when switching topics to keep context clean and focused</li>
+        <li>Use dynamic MCP loading (experimental). It loads tool descriptions on-demand instead of preloading everything, which can reduce context by ~40k tokens per session</li>
+      </ul>
+    </div>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin: 20px 0 12px;">Session Length and Context</h3>
+    <div class="card">
+      <ul style="font-size: 0.87rem; line-height: 2.2; margin-left: 20px; color: var(--text-body);">
+        <li><strong>Sessions have a ceiling.</strong> Claude Code has a finite context window. As a session gets long, older messages are automatically compressed to make room. You may notice it "forgetting" earlier details.</li>
+        <li><strong>Use <code>/compact</code> proactively.</strong> This compresses your current session context, freeing up space and reducing cost. Good to run after completing a major chunk of work.</li>
+        <li><strong>Start fresh when the task changes.</strong> If you're switching to a different project or topic, open a new session rather than continuing a long one. Clean context produces better results.</li>
+        <li><strong>Use <code>/resume</code> to pick up where you left off.</strong> If you close a session accidentally or want to return to earlier work, <code>/resume</code> reloads the previous session state.</li>
+        <li><strong>Watch for drift.</strong> In very long sessions, Claude Code may start repeating itself or losing track of earlier decisions. That's a sign to compact or start fresh.</li>
+      </ul>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION: MCPs -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="mcps">
+    <h2 class="section-title">Integrations (MCPs)</h2>
+    <p class="section-subtitle">MCPs (Model Context Protocol) give Claude Code access to external tools and data sources, so you can interact with them in natural language.</p>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 12px;">Available MCPs</h3>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Integration</th><th>What it does</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>GitHub</strong></td>
+            <td>Search repos, read files, create/review PRs, manage issues from natural language</td>
+            <td>Available via <a href="https://github.com/modelcontextprotocol/servers" target="_blank" style="color:var(--teal);">MCP servers repo</a></td>
+          </tr>
+          <tr>
+            <td><strong>Slack</strong></td>
+            <td>Read channels, search messages, post updates, pull activity summaries</td>
+            <td>Check availability for your org</td>
+          </tr>
+          <tr>
+            <td><strong>Google Drive</strong></td>
+            <td>Read, create, search, and share files in Drive; also enables Docs/Sheets integration</td>
+            <td>Community MCP available</td>
+          </tr>
+          <tr>
+            <td><strong>Gmail / Calendar</strong></td>
+            <td>Access email and calendar events from Claude Code</td>
+            <td>Google Workspace CLI is an efficient alternative</td>
+          </tr>
+          <tr>
+            <td><strong>Filesystem</strong></td>
+            <td>Read, write, and organize local files with configurable access controls</td>
+            <td>Built-in; configure paths in settings.json</td>
+          </tr>
+          <tr>
+            <td><strong>Web Search / Fetch</strong></td>
+            <td>Browse the web, fetch page content, search for current information</td>
+            <td>Built-in capability</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-info" style="margin-top: 12px;">
+      <span class="callout-icon">ℹ️</span>
+      <div>Browse the full MCP ecosystem at the <a href="https://github.com/modelcontextprotocol/servers" target="_blank" style="color:var(--ocean);">MCP servers repository</a>. Anthropic maintains official servers for many common tools, and the community adds more regularly.</div>
+    </div>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin: 20px 0 12px;">MCPs vs. CLIs</h3>
+    <div class="card">
+      <ul style="font-size: 0.87rem; line-height: 2.2; margin-left: 20px; color: var(--text-body);">
+        <li><strong>MCPs</strong> are convenient but consume more tokens because they expose broad tool surfaces</li>
+        <li><strong>CLIs</strong> can be more efficient for specific data access since they fetch exactly what's needed</li>
+        <li>For high-volume or token-sensitive workflows, consider whether a CLI approach is better</li>
+        <li>Start with the core MCPs you need. Resist installing many at once</li>
+      </ul>
+    </div>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin: 20px 0 12px;">Troubleshooting MCPs</h3>
+    <div class="accordion">
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>MCPs failing or not connecting</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <ol style="margin-left: 20px; line-height: 2.2; font-size: 0.88rem;">
+            <li>Change model: type <code>/model</code> and select a different version</li>
+            <li>Type <code>/mcp</code> and manually restart each MCP one by one</li>
+          </ol>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>MCP still broken after restart</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <ol style="margin-left: 20px; line-height: 2.2; font-size: 0.88rem;">
+            <li>Check your MCP config in <code>~/.claude/settings.json</code> for typos or bad paths</li>
+            <li>Make sure any required environment variables (API keys, tokens) are set</li>
+            <li>Try removing and re-adding the MCP configuration</li>
+            <li>Check the MCP server's own logs for errors</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION: SKILLS -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="skills">
+    <h2 class="section-title">Skills Library</h2>
+    <p class="section-subtitle">Skills are reusable workflows invoked with a <code>/</code> command. Install from the community or build your own.</p>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 12px;">Where to Find Skills</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h3>Official Docs</h3>
+        <p>Anthropic maintains documentation on built-in slash commands and how to create custom skills. Start with <a href="https://docs.anthropic.com/claude-code" target="_blank" style="color:var(--primary);">the official docs</a>.</p>
+      </div>
+      <div class="card">
+        <h3>Community Hub</h3>
+        <p>The Claude Code community shares skills, CLAUDE.md templates, and MCP setups. Search GitHub for <code>claude-code skills</code> or check the <a href="https://github.com/anthropics/claude-code" target="_blank" style="color:var(--teal);">official repo</a> discussions.</p>
+      </div>
+      <div class="card">
+        <h3>Anthropic Cookbook</h3>
+        <p>Example workflows and prompt patterns for common tasks. Browse <a href="https://github.com/anthropics/anthropic-cookbook" target="_blank" style="color:var(--primary);">the Anthropic Cookbook</a> on GitHub.</p>
+      </div>
+      <div class="card">
+        <h3>Your Own Team</h3>
+        <p>Once you build a skill that works, store it in a shared git repo so teammates can install it. Skills are just markdown files, so they're easy to share and version-control.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size: 1rem; font-weight: 700; color: var(--text); margin: 20px 0 12px;">Build Your Own Skill</h3>
+    <div class="card">
+      <p style="font-size: 0.87rem; color: var(--text-muted); margin-bottom: 10px;">The fastest path from repetitive task to one-command automation:</p>
+      <ol style="font-size: 0.87rem; line-height: 2.2; margin-left: 20px; color: var(--text-body);">
+        <li>Iterate on a task in a normal Claude Code conversation until it works well</li>
+        <li>Say: <em>"I want to do this in a repeatable way - can you turn it into a skill?"</em></li>
+        <li>Claude Code refactors it into a proper skill structure</li>
+        <li>Or: ask Claude Code to use the built-in skill-creation tool: <em>"Create me a skill for this"</em></li>
+      </ol>
+      <pre style="margin-top: 12px;">~/.claude/commands/        # Your global commands (available everywhere)
+  my-skill.md
+
+your-project/
+  .claude/commands/        # Project-scoped commands (available in this project only)
+    my-skill.md</pre>
+      <p style="font-size: 0.84rem; color: var(--text-muted); margin-top: 10px;"><strong>When to build a skill:</strong> You run the same multi-step process repeatedly, you want to share a workflow with teammates, or the task has a consistent input/output pattern.</p>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- SECTION: FAQ -->
+  <!-- ══════════════════════════════════════════ -->
+  <section class="section" id="faq">
+    <h2 class="section-title">FAQ</h2>
+    <p class="section-subtitle">Common questions from the community.</p>
+
+    <div class="accordion">
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>What is Claude Code?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          Claude Code is Anthropic's AI coding and analysis assistant that runs in VS Code or any terminal. It can access external tools (databases, Jira, Drive, etc.) via MCPs and can automate complex, multi-step tasks through natural language instructions.
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>How do I install it?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <pre>npm install -g @anthropic-ai/claude-code
+claude</pre>
+          Requires Node.js 18+. You can also install the VS Code extension from the Extensions marketplace for an integrated IDE experience.
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>Can I use Claude Code without VS Code?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          Yes. Once installed, run <code>claude</code> directly from any terminal window. VS Code is a convenient wrapper with additional features, but not a requirement.
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>Why is Claude Code slow or confused?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          Most likely you opened it at too broad a folder level. Always launch Claude Code from a specific project folder, not your root or home directory. The broader the folder, the more context noise it picks up.
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>Claude Code stopped responding. What do I do?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          This is sometimes an authentication issue. Restart the application. Use <code>/resume</code> to recover your previous session.
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>How do I switch between models?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          Run <code>/model</code> to see available models and switch. Default is Sonnet. Tradeoffs:
+          <ul style="margin: 8px 0 0 20px; line-height: 2;">
+            <li><strong>Opus:</strong> Smartest reasoning, best for complex or multi-step tasks</li>
+            <li><strong>Sonnet:</strong> Good default balance of quality and speed</li>
+            <li><strong>Haiku:</strong> Faster and cheaper, good for simple or high-volume tasks</li>
+          </ul>
+          Use <code>/fast</code> to toggle faster output on the same model tier (it does not switch to a cheaper model).
+          To set a permanent default, add the model preference to your global CLAUDE.md file.
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>Why is Claude Code giving wrong or hallucinated answers?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          Likely because you didn't specify which knowledge source to use. Always tell Claude Code explicitly: use web search, query the database, use this specific file, or look in Glean. Failure to specify is the #1 cause of hallucinated results.
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>How do I build a reusable skill?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          Iterate on a task in a normal conversation until you're happy with the output. Then say: <em>"I want to do this in a repeatable way -can you turn it into a skill?"</em> Claude Code will create a skill file in the appropriate directory. See the Skills section above for the full file structure.
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>How do I set up automated scheduling (cron jobs)?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          Ask Claude Code to set up a cron job for you: <em>"Set up a cron job to run this script every weekday at 8am."</em> It will write the cron entry and configure it. Use custom commands for recurring task triggers.
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>Claude Code seems to have deleted my work. What happened?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          Claude Code can unexpectedly delete or overwrite files, which is a known risk with AI coding tools. Always back up your work regularly. Use git to protect against accidental overwrites, and commit at every stable checkpoint before continuing complex tasks.
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>Should I install a lot of MCPs?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          Be conservative. Start with the core integrations you actually need. Extra plugins have caused the most technical issues for non-developer users (launch failures, authentication errors, etc.). Add integrations one at a time and validate each one works before adding more.
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>What is the <code>/insights</code> command?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          Provides personalized feedback on how you interact with Claude Code, helping you identify prompting patterns to improve and optimize your workflows over time.
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>What can't Claude Code do?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <ul style="margin: 0 0 0 20px; line-height: 2; font-size: 0.88rem;">
+            <li><strong>Browse or click through GUIs.</strong> It can't see your screen or interact with desktop apps unless you set up a computer-use MCP.</li>
+            <li><strong>Remember across sessions automatically.</strong> Without a CLAUDE.md or the built-in memory system, every session starts from zero.</li>
+            <li><strong>Access internal company systems.</strong> It can't reach your company's Jira, Slack, databases, or internal tools unless you wire up an MCP or CLI for each one.</li>
+            <li><strong>Run indefinitely.</strong> Sessions have context limits. Very long sessions degrade in quality as older context gets compressed.</li>
+            <li><strong>Guarantee correctness.</strong> It can produce plausible but wrong results, especially with data analysis. Always validate outputs against your domain knowledge.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <h3>How do I share something I built?</h3>
+          <span class="accordion-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <ul style="margin: 0 0 0 20px; line-height: 2; font-size: 0.88rem;">
+            <li><strong>Websites / HTML:</strong> Host on GitHub Pages via the <code>/publish-html-github</code> skill, or paste into Google Sites</li>
+            <li><strong>Skills / scripts:</strong> Share via a private GitHub repo or team folder</li>
+            <li><strong>Broader sharing:</strong> Publish as a community plugin</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <p>Claude Code Field Guide, built by the community, for the community.</p>
+  <p style="margin-top: 6px;">Claude Code is a product of <a href="https://anthropic.com" target="_blank">Anthropic</a>. Docs at <a href="https://docs.anthropic.com/claude-code" target="_blank">docs.anthropic.com/claude-code</a>.</p>
+</footer>
+
+<!-- ── KNOWLEDGE CYCLE ── -->
+<script>
+  (function() {
+    const STAGES = [
+      { id:1, label:'Orient',   sub:'Load context',        icon:'🎯', color:'#F59E0B', lightBg:'#FFFBEB', tag:'AI-powered',          tagBg:'#FEF3C7', tagFg:'#92400E',
+        body:"At the start of every session, your CLAUDE.md files load automatically: your role, preferences, past learnings, and project context. You don't re-explain yourself. The AI already knows where you left off.",
+        chips:[{icon:'📋',label:'CLAUDE.md (root)'},{icon:'📋',label:'CLAUDE.md (project)'},{icon:'🧠',label:'personal-context/'}] },
+      { id:2, label:'Explore',  sub:'Query & research',    icon:'🔍', color:'#00A699', lightBg:'#ECFDF5', tag:'AI-powered',          tagBg:'#D1FAE5', tagFg:'#064E3B',
+        body:"AI helps you search for the right data sources, draft exploratory queries, and surface patterns you might not have found manually. Speed is highest here. The AI can try ten approaches while you review the first.",
+        chips:[{icon:'🔍',label:'queries/ (drafts)'},{icon:'💬',label:'Conversational search'},{icon:'📊',label:'Data discovery'}] },
+      { id:3, label:'Validate', sub:'Apply your expertise', icon:'✅', color:'#F97316', lightBg:'#FFF7ED', tag:'YOU do this',          tagBg:'#FFEDD5', tagFg:'#9A3412',
+        body:"This step cannot be delegated. Do the numbers make sense? Are edge cases handled? Does this match what you know about how the data actually works? AI generates plausible-looking results, but your domain knowledge is what determines if they're right.",
+        chips:[{icon:'🧮',label:'Cross-check values'},{icon:'⚠️',label:'Spot the gotcha'},{icon:'✓',label:'Promote to queries/'}] },
+      { id:4, label:'Produce',  sub:'Generate output',     icon:'📤', color:'#FF5A5F', lightBg:'#FFF0F0', tag:'AI-powered',          tagBg:'#FFE4E6', tagFg:'#9F1239',
+        body:"Generate the deliverable: report, dashboard, summary, email draft. AI drafts it; you review and approve before sharing. The output/ folder is for AI-generated artifacts with a lower trust level than queries/ by design.",
+        chips:[{icon:'📤',label:'output/ (AI-generated)'},{icon:'📊',label:'Dashboards & reports'},{icon:'📝',label:'Written summaries'}] },
+      { id:5, label:'Capture',  sub:'Distill learnings',   icon:'📚', color:'#7C3AED', lightBg:'#F5F3FF', tag:'The compounding step', tagBg:'#EDE9FE', tagFg:'#4C1D95',
+        body:"Run /wrapup at the end of every significant session. It reviews what was built, identifies what's worth keeping, and writes insights to personal-context/. This is the step that makes each cycle smarter than the last. Skip it and the loop is flat.",
+        chips:[{icon:'📚',label:'personal-context/knowledge/'},{icon:'🔄',label:'/wrapup command'},{icon:'📈',label:'Feeds next cycle'}] }
+    ];
+
+    const wrap = document.getElementById('kc-wrap');
+    if (!wrap) return;
+
+    const r=218, cx=310, cy=280;
+    const positions = STAGES.map((_,i) => {
+      const a = (-90 + i*72) * Math.PI/180;
+      return { x: cx + r*Math.cos(a), y: cy + r*Math.sin(a) };
+    });
+
+    STAGES.forEach((s,i) => {
+      const pos = positions[i];
+      const card = document.createElement('div');
+      card.id = 'kc-node-'+s.id;
+      card.style.cssText = `position:absolute;width:130px;background:#fff;border:2px solid ${s.color}55;border-radius:12px;padding:12px 12px 10px;text-align:center;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .15s;box-shadow:0 2px 8px rgba(0,0,0,.07);transform:translate(-50%,-50%);z-index:10;left:${pos.x}px;top:${pos.y}px;`;
+      card.innerHTML = `<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:${s.color};font-size:.65rem;font-weight:700;color:#fff;line-height:18px;text-align:center;position:absolute;top:8px;right:8px;">${s.id}</span><div style="font-size:1.6rem;margin-bottom:5px;">${s.icon}</div><div style="font-size:.8rem;font-weight:700;color:${s.color};">${s.label}</div><div style="font-size:.68rem;color:#6B7280;margin-top:2px;">${s.sub}</div>`;
+      card.addEventListener('mouseenter', () => { if (activeId !== s.id) card.style.transform='translate(-50%,-50%) scale(1.05)'; });
+      card.addEventListener('mouseleave', () => { if (activeId !== s.id) card.style.transform='translate(-50%,-50%)'; });
+      card.addEventListener('click', () => selectStage(s.id));
+      wrap.appendChild(card);
+    });
+
+    let activeId = null;
+    function selectStage(id) {
+      if (activeId === id) { deselectAll(); activeId=null; resetDetail(); return; }
+      deselectAll();
+      activeId = id;
+      const s = STAGES[id-1];
+      const card = document.getElementById('kc-node-'+id);
+      card.style.borderColor = s.color;
+      card.style.boxShadow = `0 6px 24px rgba(0,0,0,.15)`;
+      card.style.transform = 'translate(-50%,-50%) scale(1.06)';
+      const panel = document.getElementById('kc-detail');
+      panel.style.borderColor = s.color;
+      document.getElementById('kc-dp-icon').style.cssText = `width:44px;height:44px;border-radius:10px;background:${s.lightBg};display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;`;
+      document.getElementById('kc-dp-icon').textContent = s.icon;
+      const title = document.getElementById('kc-dp-title');
+      title.textContent = s.label+' - '+s.sub; title.style.color = s.color;
+      const tag = document.getElementById('kc-dp-tag');
+      tag.textContent = s.tag; tag.style.background = s.tagBg; tag.style.color = s.tagFg;
+      document.getElementById('kc-dp-body').textContent = s.body;
+      document.getElementById('kc-dp-meta').innerHTML = s.chips.map(c=>`<span style="display:inline-flex;align-items:center;gap:5px;font-size:.75rem;font-weight:600;padding:4px 10px;border-radius:20px;border:1px solid ${s.color}33;color:${s.color};background:#F9FAFB;">${c.icon} ${c.label}</span>`).join('');
+      autoPaused = true;
+    }
+    function deselectAll() {
+      STAGES.forEach(s => { const c=document.getElementById('kc-node-'+s.id); if(c){c.style.borderColor=s.color+'55';c.style.boxShadow='0 2px 8px rgba(0,0,0,.07)';c.style.transform='translate(-50%,-50%)';} });
+    }
+    function resetDetail() {
+      const panel=document.getElementById('kc-detail'); panel.style.borderColor='#E5E7EB';
+      document.getElementById('kc-dp-icon').style.cssText='width:44px;height:44px;border-radius:10px;background:#F3F4F6;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;';
+      document.getElementById('kc-dp-icon').textContent='👆';
+      const t=document.getElementById('kc-dp-title'); t.textContent='Select a stage to explore it'; t.style.color='#1F2937';
+      const tag=document.getElementById('kc-dp-tag'); tag.textContent='Click any node in the diagram'; tag.style.background='#F3F4F6'; tag.style.color='#6B7280';
+      document.getElementById('kc-dp-body').textContent='Each stage has a clear role and a clear owner. Some steps are where AI adds the most speed; others are where your expertise is irreplaceable.';
+      document.getElementById('kc-dp-meta').innerHTML='';
+    }
+
+    // Loop dots
+    const dotWrap = document.getElementById('kc-loop-dots');
+    for(let i=0;i<8;i++){const d=document.createElement('div');d.style.cssText='width:10px;height:10px;border-radius:50%;background:#E5E7EB;transition:background .3s;';dotWrap.appendChild(d);}
+    let lit=0;
+    function animDots(){if(lit<8){dotWrap.children[lit].style.background='#00A699';lit++;setTimeout(animDots,420);}else{setTimeout(()=>{Array.from(dotWrap.children).forEach(d=>d.style.background='#E5E7EB');lit=0;setTimeout(animDots,600);},2200);}}
+    setTimeout(animDots,1200);
+
+    // Auto-cycle
+    let autoPaused=false, autoIdx=0;
+    wrap.addEventListener('click',()=>{autoPaused=true;});
+    setInterval(()=>{if(autoPaused)return;autoIdx=(autoIdx%5)+1;selectStage(autoIdx);},2800);
+  })();
+</script>
+
+<!-- ── FILE TREE ── -->
+<script>
+  (function() {
+    const LAYERS = [
+      {
+        id: 'brain',
+        headerClass: 'brain',
+        icon: '🧠',
+        title: 'Layer 1: Your Brain',
+        subtitle: 'personal-context/ — evergreen, never deletes',
+        nodes: [
+          {
+            type: 'claude', name: 'CLAUDE.md', icon: '📋',
+            badge: 'key', badgeClass: 'ft-badge-key',
+            note: 'Root context file. Tells Claude Code who you are, your role, your preferences, and where things live. Loaded automatically at the start of every session — fill this in first.'
+          },
+          {
+            type: 'folder', name: 'personal-context/', icon: '📁', open: true,
+            badge: 'evergreen', badgeClass: 'ft-badge-evergreen',
+            note: 'Permanent knowledge that compounds over time. You add to it; you never delete from it. Each session loads this context automatically.',
+            children: [
+              { type: 'file', name: 'my-profile.md', icon: '👤', note: 'Your role, background, and domain expertise. Calibrates explanations and recommendations to your level.' },
+              { type: 'file', name: 'my-writing-style.md', icon: '✍️', note: 'Tone, format preferences, phrases to avoid. Used when drafting emails, summaries, or documents.' },
+              { type: 'folder', name: 'knowledge/', icon: '📚', open: false, note: 'Domain knowledge that doesn\'t expire — business rules, processes, definitions.', children: [
+                { type: 'file', name: 'business/', icon: '🏢', note: 'Business rules, process logic, and domain-specific definitions.' },
+                { type: 'file', name: 'technical/', icon: '⚙️', note: 'Data dictionaries, field mappings, system specs.' }
+              ]},
+              { type: 'file', name: 'context/', icon: '🗂️', note: 'Reference materials: table definitions, field lookups, code lists. Your reference binder.' },
+              { type: 'file', name: 'procedures/', icon: '📋', note: 'Runbooks and how-to guides for recurring processes. Claude Code can execute these if written clearly.' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'work',
+        headerClass: 'work',
+        icon: '💼',
+        title: 'Layer 2: Your Work',
+        subtitle: 'projects/ — scoped, eventually archives',
+        nodes: [
+          {
+            type: 'folder', name: '<project-name>/', icon: '📁', open: true,
+            badge: 'scoped', badgeClass: 'ft-badge-scoped',
+            note: 'One folder per project. When the project ends, it archives. Projects should have a clear endpoint — that\'s what separates them from personal-context/.',
+            children: [
+              { type: 'claude', name: 'CLAUDE.md', icon: '📋', badge: 'key', badgeClass: 'ft-badge-key', note: 'Project context file. Documents the goal, key data sources, open questions, and domain gotchas specific to this project. Update as you learn.' },
+              { type: 'folder', name: 'queries/', icon: '🔍', note: 'Validated, reusable code (SQL, scripts). Only promote code here once you\'ve verified results. Think of this as "trusted" — goes in version control.' },
+              { type: 'folder', name: 'analysis/', icon: '📊', note: 'Investigation docs, findings, knowledge bases. Becomes the source for distilling to personal-context/ when the project closes.' },
+              { type: 'folder', name: 'output/', icon: '📤', note: 'AI-generated artifacts: reports, dashboards, exports. Lower trust level — verify before sharing or acting on.' },
+              { type: 'folder', name: 'data/', icon: '📂', note: 'Raw input files (CSVs, exports, etc.) that feed the analysis. Keeps inputs separate from generated outputs.' }
+            ]
+          }
+        ]
+      }
+    ];
+
+    function renderNode(node, depth) {
+      const id = 'ftn-' + Math.random().toString(36).slice(2);
+      const indent = depth > 0 ? 'padding-left:' + (depth * 14) + 'px;' : '';
+      let badge = node.badge ? `<span class="ft-tree-badge ${node.badgeClass}">${node.badge}</span>` : '';
+      const isFolder = node.type === 'folder';
+      const isClaude = node.type === 'claude';
+      let nameClass = 'ft-tree-name ' + (isClaude ? 'ft-claude' : (isFolder ? 'ft-folder' : ''));
+      let arrow = (isFolder && node.children && node.children.length) ?
+        `<span id="fta-${id}" style="font-size:0.62rem;color:var(--text-muted);margin-right:2px;transition:transform 0.2s;display:inline-block;transform:${node.open ? 'rotate(90deg)' : 'rotate(0deg)'}">▶</span>` : '';
+
+      let html = `<div class="ft-tree-item" style="${indent}" onclick="ftToggle('${id}',this)" data-has-note="${node.note ? 'true' : 'false'}">
+        <span class="ft-tree-icon">${node.icon}</span>
+        <span class="${nameClass}">${arrow}${node.name}</span>${badge}</div>`;
+      if (node.note) html += `<div class="ft-annotation" id="ftan-${id}" style="${indent}">${node.note}</div>`;
+      if (isFolder && node.children && node.children.length) {
+        html += `<div id="ftc-${id}" style="${node.open ? '' : 'display:none'}">`;
+        node.children.forEach(c => { html += renderNode(c, depth + 1); });
+        html += '</div>';
+      }
+      return html;
+    }
+
+    window.ftToggle = function(id, el) {
+      const ann = document.getElementById('ftan-' + id);
+      const children = document.getElementById('ftc-' + id);
+      const arrow = document.getElementById('fta-' + id);
+      if (ann) ann.classList.toggle('visible');
+      if (children) {
+        const open = children.style.display !== 'none';
+        children.style.display = open ? 'none' : 'block';
+        if (arrow) arrow.style.transform = open ? 'rotate(0deg)' : 'rotate(90deg)';
+      }
+    };
+
+    function buildLayerCard(layer) {
+      let bodyHtml = '';
+      layer.nodes.forEach(n => { bodyHtml += renderNode(n, 0); });
+      const callout = layer.id === 'brain'
+        ? `<div class="ft-claude-callout"><strong>CLAUDE.md at root</strong> — the most important file in your workspace. It tells Claude Code your name, role, preferences, and where your key data lives. Without it, you re-explain yourself every session.</div>`
+        : `<div class="ft-claude-callout"><strong>CLAUDE.md per project</strong> — each project\'s context file captures the goal, key data sources, and open questions. Update it as you learn.</div>`;
+      return `<div class="ft-layer-card">
+        <div class="ft-layer-header ${layer.headerClass}">
+          <div class="ft-layer-icon">${layer.icon}</div>
+          <div><div class="ft-layer-title">${layer.title}</div><div class="ft-layer-sub">${layer.subtitle}</div></div>
+        </div>
+        <div class="ft-layer-body">${bodyHtml}${callout}</div></div>`;
+    }
+
+    const grid = document.getElementById('ft-layer-grid');
+    if (grid) grid.innerHTML = LAYERS.map(buildLayerCard).join('');
+  })();
+</script>
+
+<!-- ── CYCLE TABS ── -->
+<script>
+  document.querySelectorAll('.ct-tab').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const section = this.closest('.card');
+      section.querySelectorAll('.ct-tab').forEach(t => t.classList.remove('active'));
+      section.querySelectorAll('.ct-panel').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+      const panel = document.getElementById('ct-panel-' + this.dataset.panel);
+      if (panel) panel.classList.add('active');
+    });
+  });
+</script>
+
+<!-- ── NAV SCROLL HIGHLIGHT ── -->
+<script>
+  const navLinks = document.querySelectorAll('.top-nav a');
+  const sections = Array.from(navLinks).map(a => document.querySelector(a.getAttribute('href')));
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY + 80;
+    sections.forEach((sec, i) => {
+      if (!sec) return;
+      if (y >= sec.offsetTop && (i === sections.length - 1 || y < sections[i+1]?.offsetTop)) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        navLinks[i].classList.add('active');
+      }
+    });
+  });
+
+  // Accordion
+  document.addEventListener('click', e => {
+    const hdr = e.target.closest('.accordion-header');
+    if (!hdr) return;
+    const item = hdr.closest('.accordion-item');
+    item.classList.toggle('open');
+  });
+</script>
+
+</body>
+</html>
